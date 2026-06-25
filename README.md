@@ -16,6 +16,29 @@ The goal was to identify fraud patterns across different dimensions like time, d
 - Amount: Transaction value
 - Fraud: 1 = Fraud, 0 = Legitimate
 
+### Project Workflow
+1. Data Ingestion
+
+The dataset was uploaded into Splunk and field extraction was verified.
+
+2. Data Exploration
+
+Initial searches were performed to understand available fields and transaction distribution.
+
+3. Fraud Analysis
+
+SPL queries were used to investigate:
+- Fraud by merchant
+- Fraud by age group
+- Fraud by category
+- Fraud by gender
+- Fraud trends by month
+- Relationships between age groups, merchants, and fraud activity
+4. Dashboard Creation
+
+The results were visualized using charts, tables, and dashboards to make patterns easier to identify.
+
+
 ## Data Preparation in Splunk
 
 After uploading the dataset into Splunk, the first step was validating field extraction.
@@ -39,6 +62,7 @@ index="main" sourcetype="fraud_dectection.csv"
 | sort -count
 ```
 <img width="1106" height="299" alt="Screenshot (80)" src="https://github.com/user-attachments/assets/cbbfb126-0e0d-445c-8e37-806382be062c" />
+
 *Screenshot 2: Category distribution chart*
 
 What this tells us:
@@ -51,6 +75,8 @@ index="main" sourcetype="fraud_dectection.csv" fraud=1
 | sort -fraud_count
 ```
 <img width="1097" height="290" alt="Screenshot (82)" src="https://github.com/user-attachments/assets/39cc360d-2816-4989-b0f5-7d43f49100b4" />
+
+
 *Screenshot 3: Fraud by merchant visualization*
 
 
@@ -75,6 +101,8 @@ index="main" sourcetype="fraud_dectection.csv" fraud=1
 | sort -count
 ```
 <img width="1101" height="307" alt="Screenshot (83)" src="https://github.com/user-attachments/assets/f17d9b24-23bf-4c24-9875-359ce4ae466e" />
+
+
 *Screenshot 4: Fraud by age group chart*
 
 
@@ -95,6 +123,7 @@ index="main" sourcetype="fraud_dectection.csv" fraud=1
 ```
 <img width="1098" height="301" alt="Screenshot (84)" src="https://github.com/user-attachments/assets/e9ab4d99-0101-4844-bd42-e81f79de5838" />
 
+
 *Screenshot 5: Fraud trend over time*
 
 Insight:
@@ -107,6 +136,8 @@ index="main" sourcetype="fraud_dectection.csv" fraud=1
 | sort -count
 ```
 <img width="1095" height="296" alt="Screenshot (86)" src="https://github.com/user-attachments/assets/5446d1fc-f266-4263-bdfe-40820641b34b" />
+
+
 *Screenshot 6: Fraud by category chart*
 
 Insight:
@@ -118,6 +149,7 @@ index="main" sourcetype="fraud_dectection.csv"  fraud=1
 | stats count by gender 
 ```
 <img width="1123" height="302" alt="Screenshot (87)" src="https://github.com/user-attachments/assets/cc61a968-1580-4ddb-b50c-17ecbcf63ef6" />
+
 
 *Screenshot 7: Gender distribution pie chart*
 
@@ -131,6 +163,7 @@ index="main" sourcetype="fraud_dectection.csv"  fraud=1
 | sort -count
 ```
 <img width="1101" height="312" alt="Screenshot (88)" src="https://github.com/user-attachments/assets/65a238f9-3dbd-4252-b079-1a6528f7637f" />
+
 
 *Screenshot 8: Gender-category table*
 
@@ -156,8 +189,25 @@ index="main" sourcetype="fraud_dectection.csv" fraud=1
 ```
 <img width="1100" height="297" alt="Screenshot (89)" src="https://github.com/user-attachments/assets/a9e5088b-441a-4a60-bb64-331c068dd660" />
 
+
 *Screenshot 9: Age vs Merchant fraud table*
 
 
 Insight:
 Identifies which age groups are linked to fraud at specific merchants.
+
+
+## Key Insights Summary
+- Certain merchants experience significantly higher fraud attempts
+- Fraud is not evenly distributed across age groups
+- Some categories are more vulnerable than others
+- Fraud activity varies across months, suggesting time-based patterns
+- Gender-based differences exist but are less dominant than merchant/category effects
+
+
+## Skills Demonstrated
+- Splunk SPL querying (search, stats, eval, sort, chart)
+- Data cleaning and transformation
+- Fraud pattern analysis
+- Dashboard creation and visualization
+- SOC-style analytical thinking
