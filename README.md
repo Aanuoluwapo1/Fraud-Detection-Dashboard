@@ -211,3 +211,22 @@ Identifies which age groups are linked to fraud at specific merchants.
 - Fraud pattern analysis
 - Dashboard creation and visualization
 - SOC-style analytical thinking
+
+## What I Learned
+
+Through this project, I learned how to:
+
+- Upload and work with datasets in Splunk
+- Verify field extraction after data ingestion
+- Use SPL commands such as search, stats, eval, sort, and chart
+- Filter events using specific conditions like fraud=1
+- Transform raw data into meaningful visualizations
+- Build dashboards to communicate findings effectively
+- Investigate fraud trends using multiple data points instead of looking at a single field
+- Present analytical findings in a structured and easy-to-understand format
+
+This project also helped me become more comfortable navigating Splunk and thinking through data from an analyst's perspective.
+
+### Tools Used
+Splunk Enterprise
+Microsoft Excel / CSV Dataset
