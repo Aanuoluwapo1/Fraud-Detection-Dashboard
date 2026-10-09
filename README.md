@@ -1,19 +1,19 @@
 # Fraud Analytics Dashboard Using Splunk
 
-This project uses Splunk to analyse financial transactions that are already labelled as fraudulent or legitimate. The analysis examines transaction patterns across merchants, categories, age groups, gender values, and months, with results presented through Splunk charts and tables.
+## Project Overview
 
-The project demonstrates practical skills relevant to SOC and cybersecurity analyst roles, including writing SPL searches, reviewing available fields, aggregating events with `stats`, transforming values with `eval`, examining relationships between fields, and communicating analytical results clearly.
+This project uses Splunk Search Processing Language (SPL) to explore financial transactions that are already labelled as fraudulent or legitimate. The searches compare transaction and fraud-labelled record counts across merchants, purchase categories, age groups, gender values, and months, with results presented through Splunk charts and tables.
 
-The project provides descriptive fraud analytics based on existing labels; it does not independently predict or identify previously unknown fraud.
+The work demonstrates data exploration, filtering, aggregation, field transformation, visualisation, and evidence-based reporting in Splunk. It is a descriptive analytics project: the searches analyse existing fraud labels and do not predict or independently identify previously unknown fraud.
 
 ## Project objectives
 
 - Inspect the available transaction fields in Splunk.
 - Compare transaction volume across purchase categories.
 - Summarise fraud-labelled records by merchant, category, age group, gender, and month.
-- Explore combinations of fields that may provide useful investigation leads.
+- Examine fraud-labelled record counts across combinations of fields.
 - Present results through readable Splunk visualisations.
-- Distinguish fraud counts from fraud rates.
+- Explain the difference between fraud counts and fraud rates.
 
 ## Tools and technologies
 
@@ -22,7 +22,7 @@ The project provides descriptive fraud analytics based on existing labels; it do
 - CSV transaction data
 - Splunk charts and tables
 
-## Dataset and Fields
+## Dataset and fields
 
 The project documentation describes these fields:
 
@@ -38,11 +38,9 @@ The project documentation describes these fields:
 | `amount` | Transaction value |
 | `fraud` | `1` for fraud-labelled records and `0` for legitimate-labelled records |
 
-### Project limitations
+### Data notes
 
-The README preserves the SPL and nine screenshots produced for this analysis. The source CSV, dataset documentation, saved Splunk objects, and original Splunk environment are unavailable, so the dataset provenance, field mappings, and results cannot currently be independently rerun or verified. The screenshots remain the available evidence of the searches and visualisations.
-
-Several visible chart labels retain trailing apostrophes, which may indicate that some categorical values required additional parsing or cleaning.
+The repository contains the SPL and nine screenshots produced for this analysis. The original CSV, dataset documentation, saved Splunk objects, and Splunk environment are not included, so independent reproduction is currently unavailable. Several chart labels contain trailing apostrophes, suggesting that some categorical values may need additional parsing or cleaning in a recreated environment.
 
 ### Sourcetype discrepancy
 
@@ -58,19 +56,17 @@ The raw-data screenshot visibly uses:
 fraud_detection.csv
 ```
 
-The screenshot also shows `source=prepared_data.csv`. The queries below preserve the documented `fraud_dectection.csv` value; the discrepancy has not been retested.
+The screenshot also shows `source=prepared_data.csv`. The original queries below retain the documented `fraud_dectection.csv` value. Determining which sourcetype was active would require access to the original Splunk configuration or a recreated environment.
 
 ## Analysis approach
 
-The project searches follow a consistent process:
+The searches use a consistent process:
 
 1. Select events from the documented index and sourcetype.
 2. Filter on `fraud=1` where the question concerns fraud-labelled records.
 3. Group matching records with `stats count`.
 4. Sort or limit the aggregated results.
-5. Display the output as a Splunk chart or table.
-
-The searches count records carrying an existing label. They do not explain how that label was assigned or determine whether an unlabelled transaction is fraudulent.
+5. Present the output as a Splunk chart or table.
 
 ## Analysis
 
@@ -267,9 +263,9 @@ fraud rate = fraud-labelled transactions / total transactions
 
 Counts answer, “Where are the most labelled fraud records?” Rates answer, “What proportion of a group's transactions are labelled as fraud?” Both can be useful, but they support different conclusions. This repository does not contain verified fraud-rate results, so none are claimed.
 
-## Future Improvements
+## Future improvements
 
-The following enhancements are proposed and have not been tested against the original dataset.
+The following enhancements would extend the analysis in a recreated environment. They have not been tested against the original dataset.
 
 ### Proposed chronological month ordering
 
@@ -297,30 +293,30 @@ This proposal still produces counts, not fraud rates, and it depends on the unve
 - Clean categorical values if the visible trailing apostrophes are present in the extracted fields.
 - Calculate both total transactions and fraud-labelled transactions before deriving rates.
 - Use clearer tables or two-dimensional charts for combined-field analyses.
-- Export a saved dashboard or include a complete dashboard screenshot if one is recreated.
-- Distinguish any future recreated-lab results from the screenshots and results documented here.
+- Save and export a complete dashboard in a future recreated lab.
+- Document future recreated-lab results separately from the work shown here.
 
-## Results and Interpretation
+## Results and interpretation
 
-The available evidence supports the following conclusions:
+The searches and screenshots show that:
 
-- Transaction records were explored and aggregated in Splunk.
-- Fraud-labelled records were grouped by several transaction attributes.
-- SPL commands including `stats`, `eval`, `sort`, and `head` were used in the documented analysis.
-- The project screenshots document multiple Splunk charts and tables.
-- The results identify differences in raw counts across groups.
+- Transaction records were explored and aggregated by category.
+- Fraud-labelled records were grouped by merchant, category, encoded age group, gender, mapped month, and selected field combinations.
+- `stats`, `eval`, `sort`, and `head` were used to transform and summarise the records.
+- The resulting group counts were presented through Splunk charts and tables.
 
-The project demonstrates descriptive Splunk analysis of labelled transaction data. It does not claim predictive fraud detection, fraud-rate results, statistical significance, causation, a complete saved dashboard, or an alerting implementation.
+These results describe the distribution of records in the labelled data. They do not establish fraud rates, statistical significance, causation, or predictive detection. The repository also does not verify a saved dashboard or alerting implementation.
 
 ## Skills demonstrated
 
 - SPL filtering and aggregation
 - Field transformation with `eval` and `case()`
 - Sorting and limiting statistical results
-- Comparing grouped event counts
-- Creating Splunk visualisations
-- Reviewing analytical limitations and data quality
-- Communicating evidence without overstating conclusions
+- Comparing transaction and fraud-labelled record counts across dimensions
+- Explaining the analytical difference between fraud counts and fraud rates
+- Presenting search results with Splunk charts and tables
+- Identifying data-quality and visualisation limitations
+- Reporting findings within the limits of the available evidence
 
 ## Technical references
 
