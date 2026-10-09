@@ -2,18 +2,20 @@
 
 ## Project Overview
 
-This project uses Splunk Search Processing Language (SPL) to explore financial transactions that are already labelled as fraudulent or legitimate. The searches compare transaction and fraud-labelled record counts across merchants, purchase categories, age groups, gender values, and months, with results presented through Splunk charts and tables.
+This project uses Splunk Search Processing Language (SPL) to analyse financial transactions that are already labelled as fraudulent or legitimate. I built it to practise turning transaction records into structured summaries and visualisations that make the distribution of fraud-labelled activity easier to understand.
 
-The work demonstrates data exploration, filtering, aggregation, field transformation, visualisation, and evidence-based reporting in Splunk. It is a descriptive analytics project: the searches analyse existing fraud labels and do not predict or independently identify previously unknown fraud.
+This type of analysis can help fraud, risk, or operations teams examine transaction patterns, understand where recorded fraud cases are concentrated, and decide which areas may warrant further investigation. These are potential applications of the analytical approach; this project does not establish that any group has a higher fraud risk or document business decisions made from its results.
+
+The work demonstrates data exploration, filtering, aggregation, field transformation, visualisation, and evidence-based reporting in Splunk. It is a descriptive analytics project based on existing labels and does not predict or independently identify previously unknown fraud.
 
 ## Project objectives
 
-- Inspect the available transaction fields in Splunk.
-- Compare transaction volume across purchase categories.
-- Summarise fraud-labelled records by merchant, category, age group, gender, and month.
-- Examine fraud-labelled record counts across combinations of fields.
-- Present results through readable Splunk visualisations.
-- Explain the difference between fraud counts and fraud rates.
+- Analyse transaction data to understand the distribution of fraud-labelled records.
+- Compare fraud-labelled transaction counts across merchants, purchase categories, age groups, gender values, and months.
+- Use SPL aggregations and visualisations to make transaction patterns easier to interpret.
+- Identify data-quality issues and patterns that may warrant further investigation.
+- Explain the difference between raw fraud counts and fraud rates.
+- Demonstrate how structured transaction analysis can support business reporting and fraud-risk assessment.
 
 ## Tools and technologies
 
@@ -103,6 +105,8 @@ index="main" sourcetype="fraud_dectection.csv"
 
 **Interpretation:** This query counts all matching transaction records by category and orders the largest counts first. It identifies high-volume categories, but it does not measure fraud risk because it does not filter on `fraud=1` or calculate a fraud rate.
 
+**Potential business use:** Category-level transaction volume provides context for later fraud-count analysis and can help teams understand the relative size of each transaction segment.
+
 ### 2. Fraud-labelled transactions by merchant
 
 **Question:** Which merchants appear most frequently in records labelled as fraudulent?
@@ -119,7 +123,7 @@ index="main" sourcetype="fraud_dectection.csv" fraud=1
 
 *Figure 3. Merchant chart showing counts of records selected by `fraud=1`.*
 
-**Interpretation:** This query ranks merchants by their raw number of fraud-labelled records. It does not show that a merchant was deliberately targeted or has a higher fraud rate. A merchant with more total transactions may naturally have more fraud-labelled transactions.
+**Interpretation:** This query ranks merchants by their raw number of fraud-labelled records. It does not show that a merchant was deliberately targeted or has a higher fraud rate. A merchant with more total transactions may naturally have more fraud-labelled transactions. The ranking could help prioritise merchants for further review when combined with transaction volume, fraud rates, and other evidence.
 
 ### 3. Fraud-labelled transactions by age group
 
@@ -170,6 +174,8 @@ index="main" sourcetype="fraud_dectection.csv" fraud=1
 *Figure 5. Fraud-labelled transaction counts by mapped month. The chart displays the month names alphabetically: August, July, June, and May.*
 
 **Interpretation:** This analysis uses SPL to group fraud-labelled transactions by month and compare their distribution across the four months represented in the dataset. The query transforms numeric month codes into readable labels, counts the matching records, and displays the results in Splunk. Sorting by the numeric month code would present the results in chronological order. The analysis provides a descriptive view of monthly fraud-labelled transaction counts; comparing fraud rates would require the total transaction volume for each month.
+
+**Potential business use:** A chronological view could support time-based reporting and help direct further review to periods with larger recorded counts, without treating those counts alone as evidence of higher risk or seasonality.
 
 ### 5. Fraud-labelled transactions by category
 
@@ -222,7 +228,7 @@ index="main" sourcetype="fraud_dectection.csv"  fraud=1
 
 *Figure 8. Visualisation associated with grouping fraud-labelled records by gender and category. The chart does not present the two-dimensional relationship clearly.*
 
-**Interpretation:** The query counts fraud-labelled records for each gender/category pair. The `gender` value is a transaction or customer attribute; it does not identify who committed fraud. A table, stacked bar chart, or heatmap would communicate this relationship more clearly.
+**Interpretation:** The query counts fraud-labelled records for each gender/category pair. The `gender` value is a transaction or customer attribute; it does not identify who committed fraud. A table, stacked bar chart, or heatmap would communicate this relationship more clearly and could help analysts identify combinations that warrant closer review.
 
 ### 8. Top age-group and merchant combinations
 
@@ -249,7 +255,7 @@ index="main" sourcetype="fraud_dectection.csv" fraud=1
 
 *Figure 9. Visualisation associated with the ten largest age-group and merchant counts.*
 
-**Interpretation:** The query returns the ten age-group/merchant pairs with the largest raw counts of fraud-labelled records. It does not establish causation, merchant risk, or age-group risk. The chart repeats age labels without clearly presenting the paired merchant, so a table would better preserve the relationship.
+**Interpretation:** The query returns the ten age-group/merchant pairs with the largest raw counts of fraud-labelled records. It does not establish causation, merchant risk, or age-group risk. The chart repeats age labels without clearly presenting the paired merchant, so a table would better preserve the relationship and support follow-up analysis of the paired fields.
 
 ## Fraud counts and fraud rates
 
@@ -309,14 +315,13 @@ These results describe the distribution of records in the labelled data. They do
 
 ## Skills demonstrated
 
-- SPL filtering and aggregation
-- Field transformation with `eval` and `case()`
-- Sorting and limiting statistical results
-- Comparing transaction and fraud-labelled record counts across dimensions
-- Explaining the analytical difference between fraud counts and fraud rates
-- Presenting search results with Splunk charts and tables
-- Identifying data-quality and visualisation limitations
-- Reporting findings within the limits of the available evidence
+- Filtering and aggregating transaction records with SPL.
+- Using `stats`, `eval`, `case()`, `sort`, and `head` to transform and summarise search results.
+- Grouping and comparing transaction and fraud-labelled record counts across multiple dimensions.
+- Building and interpreting Splunk charts and tables.
+- Recognising the limitations of raw counts and the importance of fraud rates for relative comparisons.
+- Identifying data-quality and visualisation issues that affect interpretation.
+- Communicating findings and potential business uses without drawing unsupported conclusions.
 
 ## Technical references
 
