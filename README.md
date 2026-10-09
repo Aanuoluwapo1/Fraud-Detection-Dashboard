@@ -1,91 +1,135 @@
-# Fraud Detection Dashboard using Splunk
+# Fraud Analytics Dashboard Using Splunk
 
-## Overview
+This project uses Splunk to analyse financial transactions that are already labelled as fraudulent or legitimate. The analysis examines transaction patterns across merchants, categories, age groups, gender values, and months, with results presented through Splunk charts and tables.
 
-This project analyzes simulated financial transactions to detect fraudulent activity using Splunk. The dataset contains customer transactions across multiple months, with attributes such as age group, gender, merchant, category, and transaction amount.
-The goal was to identify fraud patterns across different dimensions like time, demographics, and merchants, and present insights through a Splunk dashboard.
+The project demonstrates practical skills relevant to SOC and cybersecurity analyst roles, including writing SPL searches, reviewing available fields, aggregating events with `stats`, transforming values with `eval`, examining relationships between fields, and communicating analytical results clearly.
 
-### Dataset Description
-- Step: Month of transaction (May–August) 
-- Customer: Unique customer ID
-- Age: Age group encoded (0–5)
-- Gender: M / F
-- PostcodeOrigin: Origin location
-- Merchant: Merchant ID
-- Category: Purchase category
-- Amount: Transaction value
-- Fraud: 1 = Fraud, 0 = Legitimate
+The project provides descriptive fraud analytics based on existing labels; it does not independently predict or identify previously unknown fraud.
 
-### Project Workflow
-1. Data Ingestion
+## Project objectives
 
-The dataset was uploaded into Splunk and field extraction was verified.
+- Inspect the available transaction fields in Splunk.
+- Compare transaction volume across purchase categories.
+- Summarise fraud-labelled records by merchant, category, age group, gender, and month.
+- Explore combinations of fields that may provide useful investigation leads.
+- Present results through readable Splunk visualisations.
+- Distinguish fraud counts from fraud rates.
 
-2. Data Exploration
+## Tools and technologies
 
-Initial searches were performed to understand available fields and transaction distribution.
+- Splunk Enterprise
+- Search Processing Language (SPL)
+- CSV transaction data
+- Splunk charts and tables
 
-3. Fraud Analysis
+## Dataset and Fields
 
-SPL queries were used to investigate:
-- Fraud by merchant
-- Fraud by age group
-- Fraud by category
-- Fraud by gender
-- Fraud trends by month
-- Relationships between age groups, merchants, and fraud activity
-4. Dashboard Creation
+The project documentation describes these fields:
 
-The results were visualized using charts, tables, and dashboards to make patterns easier to identify.
+| Field | Documented meaning |
+|---|---|
+| `step` | Month code mapped in the original analysis to May through August |
+| `customer` | Customer identifier |
+| `age` | Encoded age group |
+| `gender` | Gender value |
+| `postcodeOrigin` | Origin location |
+| `merchant` | Merchant identifier |
+| `category` | Purchase category |
+| `amount` | Transaction value |
+| `fraud` | `1` for fraud-labelled records and `0` for legitimate-labelled records |
 
+### Project limitations
 
-## Data Preparation in Splunk
+The README preserves the SPL and nine screenshots produced for this analysis. The source CSV, dataset documentation, saved Splunk objects, and original Splunk environment are unavailable, so the dataset provenance, field mappings, and results cannot currently be independently rerun or verified. The screenshots remain the available evidence of the searches and visualisations.
 
-After uploading the dataset into Splunk, the first step was validating field extraction.
+Several visible chart labels retain trailing apostrophes, which may indicate that some categorical values required additional parsing or cleaning.
+
+### Sourcetype discrepancy
+
+The original README queries use the misspelled sourcetype:
+
+```text
+fraud_dectection.csv
+```
+
+The raw-data screenshot visibly uses:
+
+```text
+fraud_detection.csv
+```
+
+The screenshot also shows `source=prepared_data.csv`. The queries below preserve the documented `fraud_dectection.csv` value; the discrepancy has not been retested.
+
+## Analysis approach
+
+The project searches follow a consistent process:
+
+1. Select events from the documented index and sourcetype.
+2. Filter on `fraud=1` where the question concerns fraud-labelled records.
+3. Group matching records with `stats count`.
+4. Sort or limit the aggregated results.
+5. Display the output as a Splunk chart or table.
+
+The searches count records carrying an existing label. They do not explain how that label was assigned or determine whether an unlabelled transaction is fraudulent.
+
+## Analysis
+
+### Data preparation and field review
+
+The original project began by previewing five events.
+
+#### Original SPL
+
 ```spl
 index="main" sourcetype="fraud_dectection.csv"
 | head 5
 ```
-<img width="1350" height="668" alt="Screenshot (81)" src="https://github.com/user-attachments/assets/ea8d2818-3300-4d86-83ce-230372d480f8" />
-This confirmed that fields like age, gender, merchant, category, and fraud were correctly parsed.
 
+![Raw dataset preview in Splunk](https://github.com/user-attachments/assets/ea8d2818-3300-4d86-83ce-230372d480f8)
 
-*Screenshot 1: Raw dataset in Splunk search results*
+*Figure 1. Raw-data preview showing five CSV events, `source=prepared_data.csv`, and `sourcetype=fraud_detection.csv`. The screenshot does not display each extracted field, although the later visualisations indicate that fields such as `category`, `merchant`, and `fraud` were available for analysis.*
 
-## Dashboard Visualizations & SPL Queries
+### 1. Transaction volume by category
 
-### 1. Transaction Volume by Category
-This shows which product categories have the highest transaction counts.
+**Question:** How many transaction records appear in each category?
+
+#### Original SPL
+
 ```
 index="main" sourcetype="fraud_dectection.csv"
 | stats count by category
 | sort -count
 ```
-<img width="1106" height="299" alt="Screenshot (80)" src="https://github.com/user-attachments/assets/cbbfb126-0e0d-445c-8e37-806382be062c" />
 
-*Screenshot 2: Category distribution chart*
+![Transaction volume by category chart](https://github.com/user-attachments/assets/cbbfb126-0e0d-445c-8e37-806382be062c)
 
-What this tells us:
-It helps identify high-activity categories that may require closer fraud monitoring.
+*Figure 2. Category distribution chart showing transaction-record counts.*
 
-### 2. Fraudulent Transactions by Merchant
+**Interpretation:** This query counts all matching transaction records by category and orders the largest counts first. It identifies high-volume categories, but it does not measure fraud risk because it does not filter on `fraud=1` or calculate a fraud rate.
+
+### 2. Fraud-labelled transactions by merchant
+
+**Question:** Which merchants appear most frequently in records labelled as fraudulent?
+
+#### Original SPL
+
 ```
 index="main" sourcetype="fraud_dectection.csv" fraud=1
 | stats count as fraud_count by merchant
 | sort -fraud_count
 ```
-<img width="1097" height="290" alt="Screenshot (82)" src="https://github.com/user-attachments/assets/39cc360d-2816-4989-b0f5-7d43f49100b4" />
 
+![Fraud-labelled transaction count by merchant](https://github.com/user-attachments/assets/39cc360d-2816-4989-b0f5-7d43f49100b4)
 
-*Screenshot 3: Fraud by merchant visualization*
+*Figure 3. Merchant chart showing counts of records selected by `fraud=1`.*
 
+**Interpretation:** This query ranks merchants by their raw number of fraud-labelled records. It does not show that a merchant was deliberately targeted or has a higher fraud rate. A merchant with more total transactions may naturally have more fraud-labelled transactions.
 
-Insight:
-Shows which merchants are most targeted by fraudulent transactions.
+### 3. Fraud-labelled transactions by age group
 
-### 3. Fraud Distribution by Age Group
+**Question:** How are fraud-labelled records distributed across the documented age groups?
 
-First, we convert encoded age values into readable groups.
+#### Original SPL
 
 ```
 index="main" sourcetype="fraud_dectection.csv" fraud=1
@@ -100,16 +144,19 @@ index="main" sourcetype="fraud_dectection.csv" fraud=1
 | stats count by age_group
 | sort -count
 ```
-<img width="1101" height="307" alt="Screenshot (83)" src="https://github.com/user-attachments/assets/f17d9b24-23bf-4c24-9875-359ce4ae466e" />
 
+![Fraud-labelled transaction count by age group](https://github.com/user-attachments/assets/f17d9b24-23bf-4c24-9875-359ce4ae466e)
 
-*Screenshot 4: Fraud by age group chart*
+*Figure 4. Age-group chart based on the mapping used in the project search.*
 
+**Interpretation:** The query maps six encoded values to readable labels and counts fraud-labelled records in each resulting group. It does not establish that one age group has a higher probability of fraud, because total transaction volume per group is not included. The mapping and treatment of unexpected or missing age codes require source documentation to verify.
 
-Insight:
-Helps identify which demographic is most associated with fraud activity.
+### 4. Fraud-labelled transactions by month code
 
-### 4. Fraud by Month (Step)
+**Question:** How are fraud-labelled records distributed across the four documented month codes?
+
+#### Original SPL
+
 ```
 index="main" sourcetype="fraud_dectection.csv" fraud=1 
 | eval month=case(
@@ -121,58 +168,72 @@ index="main" sourcetype="fraud_dectection.csv" fraud=1
 | stats count by month
 | sort month
 ```
-<img width="1098" height="301" alt="Screenshot (84)" src="https://github.com/user-attachments/assets/e9ab4d99-0101-4844-bd42-e81f79de5838" />
 
+![Fraud-labelled transaction count by mapped month](https://github.com/user-attachments/assets/e9ab4d99-0101-4844-bd42-e81f79de5838)
 
-*Screenshot 5: Fraud trend over time*
+*Figure 5. Fraud-labelled transaction counts by mapped month. The chart displays the month names alphabetically: August, July, June, and May.*
 
-Insight:
-Helps detect seasonal or monthly fraud spikes.
+**Interpretation:** This analysis uses SPL to group fraud-labelled transactions by month and compare their distribution across the four months represented in the dataset. The query transforms numeric month codes into readable labels, counts the matching records, and displays the results in Splunk. Sorting by the numeric month code would present the results in chronological order. The analysis provides a descriptive view of monthly fraud-labelled transaction counts; comparing fraud rates would require the total transaction volume for each month.
 
-### 5. Fraud by Category
+### 5. Fraud-labelled transactions by category
+
+**Question:** Which categories contain the most records labelled as fraudulent?
+
+#### Original SPL
+
 ```
 index="main" sourcetype="fraud_dectection.csv" fraud=1
 | stats count by category
 | sort -count
 ```
-<img width="1095" height="296" alt="Screenshot (86)" src="https://github.com/user-attachments/assets/5446d1fc-f266-4263-bdfe-40820641b34b" />
 
+![Fraud-labelled transaction count by category](https://github.com/user-attachments/assets/5446d1fc-f266-4263-bdfe-40820641b34b)
 
-*Screenshot 6: Fraud by category chart*
+*Figure 6. Category chart limited to records selected by `fraud=1`.*
 
-Insight:
-Shows which purchase categories are most vulnerable to fraud.
+**Interpretation:** The query identifies categories with larger raw counts of fraud-labelled records. It does not establish that those categories are more vulnerable. Comparing vulnerability or relative risk would require total transaction counts and a fraud rate for each category.
 
-### 6. Fraud by Gender
+### 6. Fraud-labelled transactions by gender
+
+**Question:** How are fraud-labelled records distributed across the available gender values?
+
+#### Original SPL
+
 ```
 index="main" sourcetype="fraud_dectection.csv"  fraud=1
 | stats count by gender 
 ```
-<img width="1123" height="302" alt="Screenshot (87)" src="https://github.com/user-attachments/assets/cc61a968-1580-4ddb-b50c-17ecbcf63ef6" />
 
+![Fraud-labelled transaction distribution by gender](https://github.com/user-attachments/assets/cc61a968-1580-4ddb-b50c-17ecbcf63ef6)
 
-*Screenshot 7: Gender distribution pie chart*
+*Figure 7. Pie chart showing raw counts of fraud-labelled records by the available gender values.*
 
-Insight:
-Shows whether fraud is concentrated in a specific gender group.
+**Interpretation:** The query compares raw fraud-labelled record counts. It does not measure relative fraud risk because the total number of transactions for each gender value is unavailable in the result.
 
-### 7. Gender vs Category (Fraud Behavior)
+### 7. Gender and category distribution
+
+**Question:** How are fraud-labelled records distributed across gender and category combinations?
+
+#### Original SPL
+
 ```
 index="main" sourcetype="fraud_dectection.csv"  fraud=1
 | stats count by gender category
 | sort -count
 ```
-<img width="1101" height="312" alt="Screenshot (88)" src="https://github.com/user-attachments/assets/65a238f9-3dbd-4252-b079-1a6528f7637f" />
 
+![Gender and category analysis](https://github.com/user-attachments/assets/65a238f9-3dbd-4252-b079-1a6528f7637f)
 
-*Screenshot 8: Gender-category table*
+*Figure 8. Visualisation associated with grouping fraud-labelled records by gender and category. The chart does not present the two-dimensional relationship clearly.*
 
+**Interpretation:** The query counts fraud-labelled records for each gender/category pair. The `gender` value is a transaction or customer attribute; it does not identify who committed fraud. A table, stacked bar chart, or heatmap would communicate this relationship more clearly.
 
-Insight:
-Reveals behavioral patterns, for instance, which gender commits fraud in which category.
+### 8. Top age-group and merchant combinations
 
+**Question:** Which age-group and merchant pairs have the largest fraud-labelled record counts?
 
-### 8. Age Group vs Merchant (Top Fraud Pattern)
+#### Original SPL
+
 ```
 index="main" sourcetype="fraud_dectection.csv" fraud=1
 | eval age_group=case(
@@ -187,46 +248,82 @@ index="main" sourcetype="fraud_dectection.csv" fraud=1
 | sort -count
 | head 10
 ```
-<img width="1100" height="297" alt="Screenshot (89)" src="https://github.com/user-attachments/assets/a9e5088b-441a-4a60-bb64-331c068dd660" />
 
+![Top age-group and merchant combinations](https://github.com/user-attachments/assets/a9e5088b-441a-4a60-bb64-331c068dd660)
 
-*Screenshot 9: Age vs Merchant fraud table*
+*Figure 9. Visualisation associated with the ten largest age-group and merchant counts.*
 
+**Interpretation:** The query returns the ten age-group/merchant pairs with the largest raw counts of fraud-labelled records. It does not establish causation, merchant risk, or age-group risk. The chart repeats age labels without clearly presenting the paired merchant, so a table would better preserve the relationship.
 
-Insight:
-Identifies which age groups are linked to fraud at specific merchants.
+## Fraud counts and fraud rates
 
+Most original searches calculate a **fraud count**: the number of records matching `fraud=1` in each group.
 
-## Key Insights Summary
-- Certain merchants experience significantly higher fraud attempts
-- Fraud is not evenly distributed across age groups
-- Some categories are more vulnerable than others
-- Fraud activity varies across months, suggesting time-based patterns
-- Gender-based differences exist but are less dominant than merchant/category effects
+A **fraud rate** would compare that count with all transactions in the same group:
 
+```text
+fraud rate = fraud-labelled transactions / total transactions
+```
 
-## Skills Demonstrated
-- Splunk SPL querying (search, stats, eval, sort, chart)
-- Data cleaning and transformation
-- Fraud pattern analysis
-- Dashboard creation and visualization
-- SOC-style analytical thinking
+Counts answer, “Where are the most labelled fraud records?” Rates answer, “What proportion of a group's transactions are labelled as fraud?” Both can be useful, but they support different conclusions. This repository does not contain verified fraud-rate results, so none are claimed.
 
-## What I Learned
+## Future Improvements
 
-Through this project, I learned how to:
+The following enhancements are proposed and have not been tested against the original dataset.
 
-- Upload and work with datasets in Splunk
-- Verify field extraction after data ingestion
-- Use SPL commands such as search, stats, eval, sort, and chart
-- Filter events using specific conditions like fraud=1
-- Transform raw data into meaningful visualizations
-- Build dashboards to communicate findings effectively
-- Investigate fraud trends using multiple data points instead of looking at a single field
-- Present analytical findings in a structured and easy-to-understand format
+### Proposed chronological month ordering
 
-This project also helped me become more comfortable navigating Splunk and thinking through data from an analyst's perspective.
+The following example preserves the numeric `step` value for chronological sorting. It uses the sourcetype visible in the raw-data screenshot rather than the misspelling in the documented project queries.
 
-### Tools Used
-Splunk Enterprise
-Microsoft Excel / CSV Dataset
+```spl
+index="main" sourcetype="fraud_detection.csv" fraud=1
+| eval month=case(
+    step=0,"May",
+    step=1,"June",
+    step=2,"July",
+    step=3,"August"
+)
+| stats count by step month
+| sort 0 step
+```
+
+This proposal still produces counts, not fraud rates, and it depends on the unverified month mapping.
+
+### Additional improvements
+
+- Confirm the dataset source, licence, schema, and label definitions.
+- Validate the age and month mappings against source documentation.
+- Correct and test the sourcetype in a recreated environment.
+- Clean categorical values if the visible trailing apostrophes are present in the extracted fields.
+- Calculate both total transactions and fraud-labelled transactions before deriving rates.
+- Use clearer tables or two-dimensional charts for combined-field analyses.
+- Export a saved dashboard or include a complete dashboard screenshot if one is recreated.
+- Distinguish any future recreated-lab results from the screenshots and results documented here.
+
+## Results and Interpretation
+
+The available evidence supports the following conclusions:
+
+- Transaction records were explored and aggregated in Splunk.
+- Fraud-labelled records were grouped by several transaction attributes.
+- SPL commands including `stats`, `eval`, `sort`, and `head` were used in the documented analysis.
+- The project screenshots document multiple Splunk charts and tables.
+- The results identify differences in raw counts across groups.
+
+The project demonstrates descriptive Splunk analysis of labelled transaction data. It does not claim predictive fraud detection, fraud-rate results, statistical significance, causation, a complete saved dashboard, or an alerting implementation.
+
+## Skills demonstrated
+
+- SPL filtering and aggregation
+- Field transformation with `eval` and `case()`
+- Sorting and limiting statistical results
+- Comparing grouped event counts
+- Creating Splunk visualisations
+- Reviewing analytical limitations and data quality
+- Communicating evidence without overstating conclusions
+
+## Technical references
+
+- [Splunk `stats` command](https://help.splunk.com/en/splunk-enterprise/spl-search-reference/10.4/search-commands/stats)
+- [Splunk `eval` command](https://help.splunk.com/en/splunk-enterprise/search/search-manual/10.4/calculate-and-format-values/evaluate-and-manipulate-fields-with-multiple-values)
+- [Splunk evaluation functions](https://help.splunk.com/en/splunk-enterprise/spl-search-reference/10.4/evaluation-functions/evaluation-functions)
